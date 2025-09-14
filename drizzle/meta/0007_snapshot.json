@@ -1,0 +1,102 @@
+{
+    "version": "5",
+    "dialect": "pg",
+    "id": "0007_snapshot",
+    "prevId": "0006_snapshot",
+    "tables": {
+        "site_settings": {
+            "name": "site_settings",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "site_name": {
+                    "name": "site_name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'Catering Aja'"
+                },
+                "title": {
+                    "name": "title",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "'Catering Aja - Solusi Katering Anda'"
+                },
+                "logo_url": {
+                    "name": "logo_url",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "favicon_url": {
+                    "name": "favicon_url",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "promo_banner_enabled": {
+                    "name": "promo_banner_enabled",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": false
+                },
+                "promo_banner_text": {
+                    "name": "promo_banner_text",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "promo_banner_bg_color": {
+                    "name": "promo_banner_bg_color",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'#dc2626'"
+                },
+                "promo_banner_text_color": {
+                    "name": "promo_banner_text_color",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false,
+                    "default": "'#ffffff'"
+                },
+                "company_name": {
+                    "name": "company_name",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "company_phone": {
+                    "name": "company_phone",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "company_address": {
+                    "name": "company_address",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {}
+        }
+    },
+    "enums": {},
+    "schemas": {},
+    "_meta": {
+        "schemas": {},
+        "tables": {},
+        "columns": {}
+    }
+}

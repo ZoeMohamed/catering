@@ -1,0 +1,2 @@
+ALTER TABLE products ADD COLUMN min_order_qty INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS customization_options JSON DEFAULT '[]'; 
