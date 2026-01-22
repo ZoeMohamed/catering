@@ -10,12 +10,40 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const DEMO_USER_STORAGE_KEY = "cateringku_demo_user";
+const isStaticMode = import.meta.env.VITE_STATIC_MODE === "true";
+
+const loadDemoUser = (): User | null => {
+  if (!isStaticMode) return null;
+  try {
+    const raw = localStorage.getItem(DEMO_USER_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed as User;
+  } catch {
+    return null;
+  }
+};
+
+const saveDemoUser = (user: User | null) => {
+  if (!isStaticMode) return;
+  if (!user) {
+    localStorage.removeItem(DEMO_USER_STORAGE_KEY);
+    return;
+  }
+  localStorage.setItem(DEMO_USER_STORAGE_KEY, JSON.stringify(user));
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAuth = async () => {
+    if (isStaticMode) {
+      setUser(loadDemoUser());
+      setIsLoading(false);
+      return;
+    }
     try {
       const response = await fetch("/api/auth/me", {
         credentials: "include",
@@ -41,9 +69,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (userData: User) => {
     setUser(userData);
+    saveDemoUser(userData);
   };
 
   const logout = async () => {
+    if (isStaticMode) {
+      saveDemoUser(null);
+      setUser(null);
+      localStorage.removeItem("cateringku_cart");
+      return;
+    }
     try {
       await fetch("/api/auth/logout", {
         method: "POST",

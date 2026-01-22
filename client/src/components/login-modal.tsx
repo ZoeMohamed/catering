@@ -24,6 +24,30 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [activeTab, setActiveTab] = useState("login");
   const { login } = useAuth();
   const { toast } = useToast();
+  const isStaticMode = import.meta.env.VITE_STATIC_MODE === "true";
+
+  const demoUsers = [
+    {
+      id: 1,
+      username: "admin",
+      password: "admin",
+      role: "admin",
+      name: "Admin Demo",
+      email: "admin@demo.local",
+      phone: "",
+      createdAt: new Date(),
+    },
+    {
+      id: 2,
+      username: "user",
+      password: "user",
+      role: "customer",
+      name: "User Demo",
+      email: "user@demo.local",
+      phone: "",
+      createdAt: new Date(),
+    },
+  ];
 
   // Login form
   const loginForm = useForm<LoginRequest>({
@@ -95,10 +119,51 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   });
 
   const onLoginSubmit = (data: LoginRequest) => {
+    if (isStaticMode) {
+      const matchedUser = demoUsers.find(
+        (u) => u.username === data.username && u.password === data.password
+      );
+      if (!matchedUser) {
+        toast({
+          title: "Login Gagal",
+          description: "Akun demo tidak ditemukan. Coba admin/admin atau user/user.",
+          variant: "destructive",
+        });
+        return;
+      }
+      login(matchedUser as any);
+      toast({
+        title: "Login Demo Berhasil",
+        description: `Selamat datang, ${matchedUser.name}!`,
+      });
+      onClose();
+      loginForm.reset();
+      return;
+    }
     loginMutation.mutate(data);
   };
 
   const onRegisterSubmit = (data: InsertUser) => {
+    if (isStaticMode) {
+      const newUser = {
+        id: Date.now(),
+        username: data.username,
+        password: data.password,
+        role: "customer",
+        name: data.name || data.username,
+        email: data.email || "",
+        phone: data.phone || "",
+        createdAt: new Date(),
+      };
+      login(newUser as any);
+      toast({
+        title: "Registrasi Demo Berhasil",
+        description: `Akun ${newUser.username} dibuat (mode demo).`,
+      });
+      onClose();
+      registerForm.reset();
+      return;
+    }
     registerMutation.mutate(data);
   };
 
@@ -126,6 +191,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     <LogIn className="h-8 w-8 text-primary" />
                   </div>
                   <p className="text-gray-600">Silakan masuk untuk melanjutkan pemesanan</p>
+                  {isStaticMode && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Demo login: <span className="font-semibold">admin/admin</span> atau{" "}
+                      <span className="font-semibold">user/user</span>
+                    </p>
+                  )}
                 </div>
 
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
