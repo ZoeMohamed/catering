@@ -3,6 +3,7 @@ import Sidebar from "@/components/sidebar";
 import Header from "@/components/header";
 import { useCart } from "@/hooks/use-cart";
 import { useQuery } from "@tanstack/react-query";
+import { isStaticMode, mockPromos } from "@/lib/static-data";
 
 function copyToClipboard(code: string) {
     navigator.clipboard.writeText(code);
@@ -14,7 +15,12 @@ export default function Promo() {
     // Fetch promos from DB
     const { data: promosData, isLoading } = useQuery({
         queryKey: ["/api/promos"],
-        queryFn: async () => (await fetch("/api/promos")).json(),
+        queryFn: async () => {
+            if (isStaticMode) {
+                return { promos: mockPromos };
+            }
+            return (await fetch("/api/promos")).json();
+        },
     });
     const promos = Array.isArray(promosData?.promos) ? promosData.promos : [];
 

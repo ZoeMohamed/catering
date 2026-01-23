@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, Star, Plus, ChevronLeft, ChevronRight, SlidersHorizontal, X, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Product, Area } from "@shared/schema";
-import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
+import { isStaticMode, mockAreas, mockProducts } from "@/lib/static-data";
 
 interface ProductGridProps {
   categoryId: number | null;
@@ -29,7 +29,12 @@ export default function ProductGrid({ categoryId, categoryName, searchQuery, onP
 
   const { data: areasData } = useQuery<{ areas: Area[] }>({
     queryKey: ["/api/areas"],
-    queryFn: async () => (await fetch("/api/areas")).json(),
+    queryFn: async () => {
+      if (isStaticMode) {
+        return { areas: mockAreas };
+      }
+      return (await fetch("/api/areas")).json();
+    },
   });
   const areas = areasData?.areas ?? [];
   const selectedAreaId = areas.find(a => a.slug === areaFilter)?.id;
@@ -41,6 +46,16 @@ export default function ProductGrid({ categoryId, categoryName, searchQuery, onP
   const { data, isLoading } = useQuery<{ products: Product[] }>({
     queryKey: ["/api/products", categoryId, selectedAreaId],
     queryFn: async () => {
+      if (isStaticMode) {
+        let filtered = mockProducts;
+        if (categoryId) {
+          filtered = filtered.filter((product) => product.categoryId === categoryId);
+        }
+        if (selectedAreaId) {
+          filtered = filtered.filter((product) => product.areaId === selectedAreaId);
+        }
+        return { products: filtered };
+      }
       const response = await fetch(`/api/products?${queryParams.toString()}`, {
         credentials: "include",
       });

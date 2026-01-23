@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { OrderItem } from "@shared/schema";
+import { getMockOrderItems, isStaticMode } from "@/lib/static-data";
 
 interface OrderItemsListProps {
   orderId: number;
@@ -13,6 +14,9 @@ export default function OrderItemsList({ orderId, emptyComponent }: OrderItemsLi
   const { data: orderItems = [], isLoading } = useQuery<OrderItem[]>({
     queryKey: ["/api/orders", orderId, "items"],
     queryFn: async () => {
+      if (isStaticMode) {
+        return getMockOrderItems(orderId);
+      }
       const response = await fetch(`/api/orders/${orderId}/items`, {
         credentials: "include",
       });

@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@shared/schema";
+import { isStaticMode } from "@/lib/static-data";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -68,6 +69,18 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       if (data.newPassword && data.currentPassword) {
         updateData.currentPassword = data.currentPassword;
         updateData.newPassword = data.newPassword;
+      }
+
+      if (isStaticMode) {
+        if (!user) {
+          throw new Error("User not found");
+        }
+        return {
+          ...user,
+          name: updateData.name,
+          email: updateData.email || "",
+          phone: updateData.phone,
+        } as User;
       }
 
       const response = await apiRequest(`/api/users/${user?.id}`, "PUT", updateData);

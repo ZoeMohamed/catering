@@ -8,6 +8,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
+import { isStaticMode, mockAreas } from "@/lib/static-data";
 
 // Helper to get dates for the next 365 days
 const getDatesForOneYear = () => {
@@ -51,6 +52,9 @@ export default function AreaDateSelector({
     const { data: areaData } = useQuery<{ areas: { id: number; name: string, slug: string }[] }>({
         queryKey: ["areas"],
         queryFn: async () => {
+            if (isStaticMode) {
+                return { areas: mockAreas };
+            }
             const res = await fetch("/api/areas");
             return res.json();
         }

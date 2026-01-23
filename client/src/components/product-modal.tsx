@@ -18,6 +18,7 @@ import { id } from "date-fns/locale";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { Calendar } from "./ui/calendar";
 import { useQuery } from "@tanstack/react-query";
+import { isStaticMode, mockAreas } from "@/lib/static-data";
 import { Input } from "@/components/ui/input";
 
 interface ProductModalProps {
@@ -41,7 +42,12 @@ export default function ProductModal({ product, isOpen, onClose, deliveryDate, s
 
   const { data: areasData } = useQuery<{ areas: Area[] }>({
     queryKey: ["/api/areas"],
-    queryFn: async () => (await fetch("/api/areas")).json(),
+    queryFn: async () => {
+      if (isStaticMode) {
+        return { areas: mockAreas };
+      }
+      return (await fetch("/api/areas")).json();
+    },
   });
   const areas = areasData?.areas ?? [];
   const selectedArea = areas.find(a => a.slug === selectedAreaSlug);

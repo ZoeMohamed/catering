@@ -19,6 +19,7 @@ import { z } from "zod";
 import { useLocation } from "wouter";
 import { useAreaDate } from "@/hooks/use-area-date";
 import type { Area } from "@shared/schema";
+import { isStaticMode, mockAreas, mockPromos } from "@/lib/static-data";
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -113,14 +114,24 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   // Fetch promos from DB
   const { data: promosData } = useQuery({
     queryKey: ["/api/promos"],
-    queryFn: async () => (await fetch("/api/promos")).json(),
+    queryFn: async () => {
+      if (isStaticMode) {
+        return { promos: mockPromos };
+      }
+      return (await fetch("/api/promos")).json();
+    },
   });
   const promos = Array.isArray(promosData?.promos) ? promosData.promos : [];
 
   // Fetch areas from DB
   const { data: areasData } = useQuery<{ areas: Area[] }>({
     queryKey: ["/api/areas"],
-    queryFn: async () => (await fetch("/api/areas")).json(),
+    queryFn: async () => {
+      if (isStaticMode) {
+        return { areas: mockAreas };
+      }
+      return (await fetch("/api/areas")).json();
+    },
   });
   const areas = Array.isArray(areasData?.areas) ? areasData.areas : [];
 
@@ -212,6 +223,15 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           })),
         };
       });
+
+      if (isStaticMode) {
+        const demoOrders = ordersForBatch.map((order, index) => ({
+          ...order,
+          id: Date.now() + index,
+          code: `DEMO-${Date.now()}-${index + 1}`,
+        }));
+        return { orders: demoOrders };
+      }
 
       const response = await fetch("/api/orders/batch", {
         method: "POST",

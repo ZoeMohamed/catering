@@ -25,6 +25,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Order } from "@shared/schema";
 import OrderItemsList from "@/components/order-items-list";
+import { getMockOrderItems, isStaticMode, mockOrders } from "@/lib/static-data";
 
 export default function OrderHistory() {
     const { user } = useAuth();
@@ -38,6 +39,9 @@ export default function OrderHistory() {
     const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
         queryKey: ["/api/orders/my-orders"],
         queryFn: async () => {
+            if (isStaticMode) {
+                return mockOrders as Order[];
+            }
             const response = await apiRequest("GET", "/api/orders/my-orders");
             const data = await response.json();
             return data.orders || [];
@@ -48,9 +52,11 @@ export default function OrderHistory() {
     // Invoice generation function
     const generateInvoice = async (order: Order) => {
         try {
-            const orderItems = await fetch(`/api/orders/${order.id}/items`, {
-                credentials: "include",
-            }).then(res => res.json());
+            const orderItems = isStaticMode
+                ? getMockOrderItems(order.id)
+                : await fetch(`/api/orders/${order.id}/items`, {
+                    credentials: "include",
+                }).then(res => res.json());
 
             const invoiceWindow = window.open('', '_blank');
             if (!invoiceWindow) return;
@@ -146,9 +152,11 @@ export default function OrderHistory() {
     // Export order details function
     const exportOrderDetails = async (order: Order) => {
         try {
-            const orderItems = await fetch(`/api/orders/${order.id}/items`, {
-                credentials: "include",
-            }).then(res => res.json());
+            const orderItems = isStaticMode
+                ? getMockOrderItems(order.id)
+                : await fetch(`/api/orders/${order.id}/items`, {
+                    credentials: "include",
+                }).then(res => res.json());
 
             const csvContent = [
                 ['Kode Pesanan', 'Tanggal', 'Pelanggan', 'Telepon', 'Alamat', 'Produk', 'Qty', 'Harga', 'Subtotal', 'Total', 'Status'],

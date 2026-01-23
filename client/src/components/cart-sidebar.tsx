@@ -7,6 +7,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Product, CartItem } from "@shared/schema";
+import { isStaticMode, mockProducts } from "@/lib/static-data";
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -20,7 +21,12 @@ export default function CartSidebar({ isOpen, onClose, onCheckout }: CartSidebar
   // Fetch all products to get customization details
   const { data: productsData } = useQuery<{ products: Product[] }>({
     queryKey: ["/api/products"],
-    queryFn: async () => (await apiRequest("GET", "/api/products")).json(),
+    queryFn: async () => {
+      if (isStaticMode) {
+        return { products: mockProducts };
+      }
+      return (await apiRequest("GET", "/api/products")).json();
+    },
   });
 
   const productsMap = productsData?.products.reduce((map, product) => {

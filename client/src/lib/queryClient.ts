@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { getMockResponse, isStaticMode } from "./static-data";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -12,6 +13,16 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  if (isStaticMode && method.toUpperCase() === "GET") {
+    const mock = getMockResponse(url);
+    if (mock !== undefined) {
+      return new Response(JSON.stringify(mock), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  }
+
   const res = await fetch(url, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
@@ -29,7 +40,15 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    const url = queryKey[0] as string;
+    if (isStaticMode) {
+      const mock = getMockResponse(url);
+      if (mock !== undefined) {
+        return mock;
+      }
+    }
+
+    const res = await fetch(url, {
       credentials: "include",
     });
 
