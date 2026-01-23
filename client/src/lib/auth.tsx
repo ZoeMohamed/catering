@@ -12,6 +12,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const DEMO_USER_STORAGE_KEY = "cateringku_demo_user";
 const isStaticMode = import.meta.env.VITE_STATIC_MODE === "true";
+const DEFAULT_DEMO_USER: User = {
+  id: 1,
+  username: "user",
+  password: "",
+  role: "customer",
+  name: "Demo User",
+  email: "user@demo.local",
+  phone: "",
+  createdAt: new Date(),
+};
 
 const loadDemoUser = (): User | null => {
   if (!isStaticMode) return null;
@@ -40,7 +50,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     if (isStaticMode) {
-      setUser(loadDemoUser());
+      const storedUser = loadDemoUser();
+      if (storedUser) {
+        setUser(storedUser);
+      } else {
+        setUser(DEFAULT_DEMO_USER);
+        saveDemoUser(DEFAULT_DEMO_USER);
+      }
       setIsLoading(false);
       return;
     }
